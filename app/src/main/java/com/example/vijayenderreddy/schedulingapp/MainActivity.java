@@ -45,6 +45,10 @@ public class MainActivity extends AppCompatActivity {
 
                 //Intent i = new Intent(MainActivity.this, HomePage.class);
                 //startActivity(i);
+                if(STAFFID.getText().toString().trim().equals("")||PASSWORD.getText().toString().trim().equals("")){
+                    Toast.makeText(getApplicationContext(),"Please enter valid staff id and password",Toast.LENGTH_LONG).show();
+                    return;
+                }
                new MyTask(STAFFID.getText().toString().trim(),PASSWORD.getText().toString().trim()).execute();
             }
 
@@ -130,6 +134,7 @@ public class MainActivity extends AppCompatActivity {
             super.onPostExecute(result);
 
             if(result.equals("Successfull")){
+                PreferenceData.setLoggedInUserEmail(getApplicationContext(),staffid);
                 Intent i = new Intent(MainActivity.this, HomePage.class);
                 i.putExtra("staffid",staffid);
                 startActivity(i);

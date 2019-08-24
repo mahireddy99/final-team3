@@ -9,37 +9,40 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TimePicker;
+import android.widget.Toast;
 
 import java.util.Calendar;
 
 public class SetAppointments extends AppCompatActivity {
-     Button button;
-    static EditText editText;
+     Button invitebutton;
+     ImageButton selectDate,selectStartTime,selectEndTime;
+    static TextView DateTxt;
+    TextView StartTime,EndTime;
+    TextView textView,textView1,textView2,textView3,textView4,textView5;
+    EditText RoomNum;
+    Spinner CategoryDropDown;
+    String[] category = { "Group Discusion","Finance","Semister Exams","Schedule","Project","Admissions" };
 
-    String[] category = { "Group Discussion","FINANCE","SEMESTER EXAMS","SCHEDULE","PROJECT","ADMISSIONS" };
+    Calendar mcurrentTime;
+    int currentHour,currentMinute;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.set_appointments);
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.select_dialog_singlechoice,category);
-        AutoCompleteTextView acTextView = (AutoCompleteTextView) findViewById(R.id.categedt);
-        acTextView.setThreshold(1);
-        acTextView.setAdapter(adapter);
 
-
-
-        TextView textView,textView1,textView2,textView3,textView4,textView5;
-        final EditText editText1,editText2,editText3,editText4,editText5;
-        Button invitebutton,button;
+        CategoryDropDown = findViewById(R.id.categedt);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(SetAppointments.this,android.R.layout.simple_list_item_1,category);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        CategoryDropDown.setAdapter(adapter);
 
        textView=(TextView)findViewById(R.id.appdatetxt);
         textView2=(TextView)findViewById(R.id.starttimtxt);
@@ -48,69 +51,93 @@ public class SetAppointments extends AppCompatActivity {
         textView5=(TextView)findViewById(R.id.categtxt);
 
 
-        editText1 = findViewById(R.id.aptdateedt);
-        editText2=(EditText)findViewById(R.id.starttimeedt);
-        editText3=(EditText)findViewById(R.id.endtimeedt);
-        editText4=(EditText)findViewById(R.id.roomnoedt);
-        editText5 = findViewById(R.id.categedt);
-        editText2.setOnClickListener(new View.OnClickListener() {
+        DateTxt= (TextView) findViewById(R.id.aptdateedt);
+        StartTime=(TextView)findViewById(R.id.starttimeedt);
+        EndTime=(TextView) findViewById(R.id.endtimeedt);
+        RoomNum=(EditText)findViewById(R.id.roomnoedt);
+
+        mcurrentTime = Calendar.getInstance();
+        currentHour = mcurrentTime.get(Calendar.HOUR_OF_DAY);
+        currentMinute = mcurrentTime.get(Calendar.MINUTE);
+
+        selectStartTime = findViewById(R.id.selectStartTimeBtn);
+        selectStartTime.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Calendar mcurrentTime = Calendar.getInstance();
-                int hour = mcurrentTime.get(Calendar.HOUR_OF_DAY);
-                int minute = mcurrentTime.get(Calendar.MINUTE);
+
                 TimePickerDialog mTimePicker;
                 mTimePicker = new TimePickerDialog(SetAppointments.this, new TimePickerDialog.OnTimeSetListener() {
                     @Override
                     public void onTimeSet(TimePicker timePicker, int selectedHour, int selectedMinute) {
-                        editText2.setText( selectedHour + ":" + selectedMinute);
+
+
+
+                        StartTime.setText(String.format("%02d:%02d",selectedHour,selectedMinute));
                     }
-                }, hour, minute, true);
-                mTimePicker.setTitle("Select Time");
+                }, currentHour, currentMinute, false);
+                mTimePicker.setTitle("Select Start Time");
                 mTimePicker.show();
+
             }
         });
 
-        editText3.setOnClickListener(new View.OnClickListener() {
+
+        selectEndTime = findViewById(R.id.selectEndTimeBtn);
+        selectEndTime.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Calendar mcurrentTime = Calendar.getInstance();
-                int hour = mcurrentTime.get(Calendar.HOUR_OF_DAY);
-                int minute = mcurrentTime.get(Calendar.MINUTE);
+
                 TimePickerDialog mTimePicker;
                 mTimePicker = new TimePickerDialog(SetAppointments.this, new TimePickerDialog.OnTimeSetListener() {
                     @Override
                     public void onTimeSet(TimePicker timePicker, int selectedHour, int selectedMinute) {
-                        editText3.setText( selectedHour + ":" + selectedMinute);
+                        if(StartTime.getText().toString().trim().equals("Select Start Time")){
+                            Toast.makeText(getApplicationContext(),"Please select start time first",Toast.LENGTH_LONG).show();
+
+                        }
+                        else if(selectedHour<Integer.parseInt(StartTime.getText().toString().trim().substring(0,2))){
+                            Toast.makeText(getApplicationContext(),"Please select valid time",Toast.LENGTH_LONG).show();
+
+                        }
+                        else {
+
+
+                            EndTime.setText(String.format("%02d:%02d", selectedHour, selectedMinute));
+                        }
                     }
-                }, hour, minute, true);
-                mTimePicker.setTitle("Select Time");
+                }, currentHour, currentMinute, true);
+                mTimePicker.setTitle("Select End Time");
                 mTimePicker.show();
+
             }
         });
+
 
         invitebutton=(Button)findViewById(R.id.invitebtn);
 
         invitebutton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if((DateTxt.getText().toString().trim()).equals("Select Date")|(StartTime.getText().toString().trim()).equals("Select Start Time")|(EndTime.getText().toString().trim()).equals("Select End Time")|(RoomNum.getText().toString().trim()).length()<=0){
+                    Toast.makeText(getApplicationContext(),"Enter Valid Details",Toast.LENGTH_LONG).show();
+                    return;
+                }
+                String stime= (StartTime.getText().toString().trim()).replace(":","");
+                String etime= (EndTime.getText().toString().trim()).replace(":","");
                 Intent i = new Intent(SetAppointments.this,InviteSelectStaff.class);
-                i.putExtra("AptDate",editText1.getText().toString().trim());
-                i.putExtra("StartTime",editText2.getText().toString().trim());
-                i.putExtra("EndTime",editText3.getText().toString().trim());
-                i.putExtra("RoomNo",editText4.getText().toString().trim());
-                i.putExtra("Category",editText5.getText().toString().trim());
+                i.putExtra("AptDate",DateTxt.getText().toString().trim());
+                i.putExtra("StartTime",stime);
+                i.putExtra("EndTime",etime);
+                i.putExtra("RoomNo",RoomNum.getText().toString().trim());
+                i.putExtra("Category",String.valueOf(CategoryDropDown.getSelectedItemPosition()+1));
                 i.putExtra("staffid",getIntent().getStringExtra("staffid"));
                 startActivity(i);
             }
         });
 
-        button= (Button) findViewById(R.id.datebutton);
-        editText= (EditText) findViewById(R.id.aptdateedt);
+        selectDate= (ImageButton) findViewById(R.id.datebutton);
 
-
-
-        button.setOnClickListener(new View.OnClickListener() {
+        selectDate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 DialogFragment newFragment=new DatePickerFragment();
@@ -119,6 +146,10 @@ public class SetAppointments extends AppCompatActivity {
         });
 
     }
+
+    private void compareto(ImageButton selectEndTime) {
+    }
+
 
     public static class DatePickerFragment extends DialogFragment implements    DatePickerDialog.OnDateSetListener{
         @Override
@@ -133,7 +164,7 @@ public class SetAppointments extends AppCompatActivity {
                 days="0"+day;
 
             }
-            editText.setText(days+"/"+months+"/"+years);
+            DateTxt.setText(years+"-"+months+"-"+days);
 
 
         }
@@ -147,17 +178,9 @@ public class SetAppointments extends AppCompatActivity {
             int day=c.get(Calendar.DAY_OF_MONTH);
             DatePickerDialog datePickerDialog=null;
             datePickerDialog=new DatePickerDialog(getActivity(), this, year,  month, day);
-
+            datePickerDialog .getDatePicker().setMinDate(System.currentTimeMillis() - 1000);
             return datePickerDialog;
         }
-
-
-
-
-
-
-
-
 
     }
 
