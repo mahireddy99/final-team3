@@ -6,6 +6,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import org.json.JSONException;
@@ -17,110 +19,132 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 public class CurrentAppointments extends AppCompatActivity {
 
+    CheckBox currentapt1,currentapt2,currentapt3;
+    JSONObject MainObj;
+    Button updatebutton,backbutton;
+    TextView NoCurrentApt;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.current_appointments);
 
-        Button updatebutton,deletebutton,backbutton;
+        if(PreferenceData.getLoggedInEmailUser(this).equals("")){
+            Intent i = new Intent(this,MainActivity.class);
+            startActivity(i);
+        }
+
+        NoCurrentApt = findViewById(R.id.nocurapttxt);
 
         updatebutton=(Button)findViewById(R.id.updatebtn);
-        deletebutton=(Button)findViewById(R.id.deletebtn);
         backbutton = (Button)findViewById(R.id.capthome);
 
         backbutton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent i = new Intent(CurrentAppointments.this, HomePage.class);
+                i.putExtra("staffid",getIntent().getStringExtra("staffid"));
                 startActivity(i);
             }
         });
 
-        invite1 = findViewById(R.id.invitation1);
-        invite2 = findViewById(R.id.invitation2);
-        invite3 = findViewById(R.id.invitation3);
+        currentapt1 = findViewById(R.id.curapt1);
+        currentapt2 = findViewById(R.id.curapt2);
+        currentapt3 = findViewById(R.id.curapt3);
 
-
-        appointrequesthome.setOnClickListener(new View.OnClickListener() {
+        currentapt1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent i = new Intent(AppointmentRequests.this, HomePage.class);
+                if(currentapt1.isChecked()){
+                    currentapt2.setChecked(false);
+                    currentapt3.setChecked(false);
+                }
+            }
+        });
+        currentapt2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(currentapt2.isChecked()){
+                    currentapt1.setChecked(false);
+                    currentapt3.setChecked(false);
+                }
+            }
+        });
+
+        currentapt3.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(currentapt3.isChecked()){
+                    currentapt1.setChecked(false);
+                    currentapt2.setChecked(false);
+                }
+            }
+        });
+
+        String date = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
+        new MyTask(PreferenceData.getLoggedInEmailUser(this),date).execute();
+
+        updatebutton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                JSONObject childObject = null;
+                if(currentapt1.isChecked()){
+                    try {
+                        childObject = MainObj.getJSONObject(String.valueOf(0));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+                else if(currentapt2.isChecked()){
+                    try {
+                        childObject = MainObj.getJSONObject(String.valueOf(1));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+                else if(currentapt3.isChecked()){
+                    try {
+                        childObject = MainObj.getJSONObject(String.valueOf(2));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+                if(!currentapt1.isChecked()&&!currentapt2.isChecked()&&!currentapt3.isChecked()){
+                    Toast.makeText(getApplicationContext(),"Please select an appointment",Toast.LENGTH_LONG).show();
+                    return;
+                }
+                Intent i = new Intent(CurrentAppointments.this,update_Appointment.class);
+                i.putExtra("userLoggedInId",getIntent().getStringExtra("staffid"));
+                String AptId="",StartTime="",EndTime="",AptDate="",RoomNumber="",Category="",StaffName="";
+                try {
+                    AptId = childObject.getString("aptId");
+                    StartTime = childObject.getString("startTime");
+                    EndTime = childObject.getString("endTime");
+                    AptDate = childObject.getString("AppointmentDate");
+                    RoomNumber = childObject.getString("roomNumber");
+                    Category = childObject.getString("Category");
+                    StaffName = childObject.getString("StaffName");
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                i.putExtra("AptId",AptId);
+                i.putExtra("StartTime",StartTime);
+                i.putExtra("EndTime",EndTime);
+                i.putExtra("AptDate",AptDate);
+                i.putExtra("RoomNumber",RoomNumber);
+                i.putExtra("Category",Category);
+                i.putExtra("StaffName",StaffName);
+
                 startActivity(i);
-            }
-        });
 
-        new AppointmentRequests.MyTask(getIntent().getStringExtra("staffid")).execute();
-
-        acceptedbutton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Status = "ACCEPTED";
-                for(int i=0;i<=2;i++){
-                    String StaffId="",SenderId="";
-                    try {
-                        JSONObject childObject = MainObj.getJSONObject(String.valueOf(i));
-                        StaffId = childObject.getString("StaffId");
-                        SenderId = childObject.getString("SenderId");
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                    switch (i){
-                        case 0:
-                            if(invite1.isChecked()){
-                                new AppointmentRequests.MyTask1(StaffId,Status,SenderId).execute();
-                            }
-                            break;
-                        case 1:
-                            if(invite2.isChecked()){
-                                new AppointmentRequests.MyTask1(StaffId,Status,SenderId).execute();
-                            }
-                            break;
-                        case 2:
-                            if(invite3.isChecked()){
-                                new AppointmentRequests.MyTask1(StaffId,Status,SenderId).execute();
-                            }
-                            break;
-
-                    }
-                }
-            }
-        });
-
-        rejectedbutton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Status = "REJECTED";
-                for(int i=0;i<=2;i++){
-                    String StaffId="",SenderId="";
-                    try {
-                        JSONObject childObject = MainObj.getJSONObject(String.valueOf(i));
-                        StaffId = childObject.getString("StaffId");
-                        SenderId = childObject.getString("SenderId");
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                    switch (i){
-                        case 0:
-                            if(invite1.isChecked()){
-                                new AppointmentRequests.MyTask1(StaffId,Status,SenderId).execute();
-                            }
-                            break;
-                        case 1:
-                            if(invite2.isChecked()){
-                                new AppointmentRequests.MyTask1(StaffId,Status,SenderId).execute();
-                            }
-                            break;
-                        case 2:
-                            if(invite3.isChecked()){
-                                new AppointmentRequests.MyTask1(StaffId,Status,SenderId).execute();
-                            }
-                            break;
-
-                    }
-                }
             }
         });
     }
@@ -128,10 +152,11 @@ public class CurrentAppointments extends AppCompatActivity {
 
     private class MyTask extends AsyncTask<Void, Void, String> {
         String message;
-        String staffid;
-        public MyTask(String staffid){
-            this.staffid = staffid;
-
+        String senderID;
+        String AptDate;
+        public MyTask(String senderID,String AptDate){
+            this.senderID = senderID;
+            this.AptDate = AptDate;
         }
         @Override
         protected String doInBackground(Void... params){
@@ -140,7 +165,7 @@ public class CurrentAppointments extends AppCompatActivity {
             URL url = null;
             try {
 
-                url = new URL("http://10.0.2.2:8080/FinalProject/mad306/team3/getappointments&"+staffid);
+                url = new URL("http://10.0.2.2:8080/FinalProject/mad306/team3/currentappointmet&"+senderID+"&"+AptDate);
 
                 HttpURLConnection client = null;
 
@@ -185,26 +210,39 @@ public class CurrentAppointments extends AppCompatActivity {
         @Override
         protected void onPostExecute(String result){
             super.onPostExecute(result);
-
+            if(result.equals("{}")){
+                NoCurrentApt.setVisibility(View.VISIBLE);
+                updatebutton.setVisibility(View.GONE);
+                return;
+            }
             try {
                 MainObj =new JSONObject(result);
                 for(int i = 0;i<=2;i++){
                     if(MainObj.has(String.valueOf(i))){
                         JSONObject jsonObject = MainObj.getJSONObject(String.valueOf(i));
-
-                        String Invitation = "You have an invitation With StaffId: "+jsonObject.getString("SenderId")+"\non Date:"+jsonObject.getString("AppointmentDate")+"\nStart Time: "+jsonObject.getString("startTime")+" End Time: "+jsonObject.getString("endTime")+"\nRoom Number: "+jsonObject.getString("roomNumber")+" Category: "+jsonObject.getString("Category");
+                        String StartTime = jsonObject.getString("startTime");
+                        String EndTime = jsonObject.getString("endTime");
+                        if(StartTime.length()==3){
+                            StartTime = "0"+StartTime;
+                        }
+                        if(EndTime.length()==3){
+                            EndTime = "0"+EndTime;
+                        }
+                        StartTime = StartTime.substring(0,2)+":"+StartTime.substring(2,4);
+                        EndTime = EndTime.substring(0,2)+":"+EndTime.substring(2,4);
+                        String Invitation = "You have an Appointment With "+jsonObject.getString("StaffName")+"\nStart Time: "+StartTime+" End Time: "+EndTime+"\nRoom Number: "+jsonObject.getString("roomNumber")+" Category: "+jsonObject.getString("Category");
                         if(i==0){
-                            invite1.setVisibility(View.VISIBLE);
-                            invite1.setText(Invitation);
+                            currentapt1.setVisibility(View.VISIBLE);
+                            currentapt1.setText(Invitation);
                             Invitation = "";
                         }else if(i==1){
-                            invite2.setVisibility(View.VISIBLE);
-                            invite2.setText(Invitation);
+                            currentapt2.setVisibility(View.VISIBLE);
+                            currentapt2.setText(Invitation);
                             Invitation = "";
 
                         }else if(i==2){
-                            invite3.setVisibility(View.VISIBLE);
-                            invite3.setText(Invitation);
+                            currentapt3.setVisibility(View.VISIBLE);
+                            currentapt3.setText(Invitation);
                             Invitation = "";
                         }
                     }
@@ -220,97 +258,4 @@ public class CurrentAppointments extends AppCompatActivity {
 
     }
 
-    private class MyTask1 extends AsyncTask<Void, Void, String> {
-        String message;
-        String staffid,senderId,status;
-        public MyTask1(String staffid,String status,String senderId){
-            this.staffid = staffid;
-            this.senderId = senderId;
-            this.status = status;
-
-        }
-        @Override
-        protected String doInBackground(Void... params){
-
-
-            URL url = null;
-            try {
-
-                url = new URL("http://10.0.2.2:8080/FinalProject/mad306/team3/updateAppointmentStatus&"+staffid+"&"+status+"&"+senderId);
-
-                HttpURLConnection client = null;
-
-                client = (HttpURLConnection) url.openConnection();
-
-                client.setRequestMethod("GET");
-
-                int responseCode = client.getResponseCode();
-
-                System.out.println("\n Sending 'GET' request to URL : " + url);
-
-                System.out.println("Response Code : " + responseCode);
-
-                InputStreamReader myInput= new InputStreamReader(client.getInputStream());
-
-                BufferedReader in = new BufferedReader(myInput);
-                String inputLine;
-                StringBuffer response = new StringBuffer();
-
-                while ((inputLine = in.readLine()) != null) {
-                    response.append(inputLine);
-                }
-                in.close();
-
-                //print result
-                System.out.println(response.toString());
-                JSONObject object = new JSONObject(response.toString());
-
-
-                message = object.getString("message");
-            }
-            catch (MalformedURLException e) {
-                e.printStackTrace();
-            }
-
-            catch (IOException e) {
-                e.printStackTrace();
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-            return message;
-
-        }
-
-        @Override
-        protected void onPostExecute(String result){
-            super.onPostExecute(result);
-
-            if(result.equals("Successfull")){
-                if(Status.equals("ACCEPTED")){
-                    Toast.makeText(getApplicationContext(),"Invitation has been accepted.",Toast.LENGTH_LONG).show();
-                }
-                else {
-                    Toast.makeText(getApplicationContext(),"Invitation has been rejected.",Toast.LENGTH_LONG).show();
-                }
-                Intent i = new Intent(AppointmentRequests.this, HomePage.class);
-                startActivity(i);
-                finish();
-            }
-            else {
-                if(Status.equals("ACCEPTED")){
-                    Toast.makeText(getApplicationContext(),"Could not accept the invitation!",Toast.LENGTH_LONG).show();
-                }
-                else {
-                    Toast.makeText(getApplicationContext(),"Could not reject the invitation!",Toast.LENGTH_LONG).show();
-                }
-
-            }
-
-        }
-
-    }
-
-
-}
-    }
 }

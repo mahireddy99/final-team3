@@ -1,10 +1,12 @@
 package com.example.vijayenderreddy.schedulingapp;
 
 import android.content.Intent;
+import android.os.PersistableBundle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 public class HomePage extends AppCompatActivity {
 
@@ -13,6 +15,10 @@ public class HomePage extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.home_page);
 
+        if(PreferenceData.getLoggedInEmailUser(this).equals("")){
+            Intent i = new Intent(this,MainActivity.class);
+            startActivity(i);
+        }
         Button acceptRequestbtn,appointmentRequestbtn,appointmentHistorybtn,createProfilebtn,currentAppointmentbtn,
                    logoutbutton,setAppointmentsbtn,setAvailabilitybtn,viewAvailabilitybtn;
 
@@ -27,10 +33,13 @@ public class HomePage extends AppCompatActivity {
         viewAvailabilitybtn = (Button)findViewById(R.id.viewstaffbtn);
 
 
+
+
         acceptRequestbtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent i = new Intent(HomePage.this, AcceptedRequests.class);
+                i.putExtra("staffid",getIntent().getStringExtra("staffid"));
                 startActivity(i);
             }
         });
@@ -55,6 +64,7 @@ public class HomePage extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent i = new Intent(HomePage.this, CreateProfile.class);
+                i.putExtra("staffid",getIntent().getStringExtra("staffid"));
                 startActivity(i);
             }
         });
@@ -62,6 +72,7 @@ public class HomePage extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent i = new Intent(HomePage.this, CurrentAppointments.class);
+                i.putExtra("staffid",getIntent().getStringExtra("staffid"));
                 startActivity(i);
             }
         });
@@ -69,6 +80,7 @@ public class HomePage extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent i = new Intent(HomePage.this, LogOut.class);
+                i.putExtra("staffid",getIntent().getStringExtra("staffid"));
                 startActivity(i);
             }
         });
@@ -84,6 +96,7 @@ public class HomePage extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent i = new Intent(HomePage.this, SetAvailability.class);
+                i.putExtra("staffid",getIntent().getStringExtra("staffid"));
                 startActivity(i);
             }
         });
@@ -91,6 +104,7 @@ public class HomePage extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent i = new Intent(HomePage.this, ViewAvailability.class);
+                i.putExtra("staffid",getIntent().getStringExtra("staffid"));
                 startActivity(i);
             }
         });
