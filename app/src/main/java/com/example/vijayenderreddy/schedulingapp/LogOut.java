@@ -27,6 +27,7 @@ public class LogOut extends AppCompatActivity {
         yesbutton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                PreferenceData.clearLoggedInEmailAddress(getApplicationContext());
                 Intent i = new Intent(LogOut.this,MainActivity.class);
                 startActivity(i);
             }
