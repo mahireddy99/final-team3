@@ -29,6 +29,10 @@ public class InviteSelectStaff extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_invite_select_staff);
 
+        if(PreferenceData.getLoggedInEmailUser(this).equals("")){
+            Intent i = new Intent(this,MainActivity.class);
+            startActivity(i);
+        }
         staff1 = findViewById(R.id.staff1);
         staff2 = findViewById(R.id.staff2);
         staff3 = findViewById(R.id.staff3);
@@ -37,25 +41,25 @@ public class InviteSelectStaff extends AppCompatActivity {
         staff6 = findViewById(R.id.staff6);
         staff7 = findViewById(R.id.staff7);
 
-        if((getIntent().getStringExtra("staffid")).equals(staff1.getText().toString().trim())){
+        if((staff1.getText().toString().trim()).contains(getIntent().getStringExtra("staffid"))){
             staff1.setVisibility(View.GONE);
         }
-        else if((getIntent().getStringExtra("staffid")).equals(staff2.getText().toString().trim())){
+        else if((staff2.getText().toString().trim()).contains(getIntent().getStringExtra("staffid"))){
             staff2.setVisibility(View.GONE);
         }
-        else if((getIntent().getStringExtra("staffid")).equals(staff3.getText().toString().trim())){
+        else if((staff3.getText().toString().trim()).contains(getIntent().getStringExtra("staffid"))){
             staff3.setVisibility(View.GONE);
         }
-        else if((getIntent().getStringExtra("staffid")).equals(staff4.getText().toString().trim())){
+        else if((staff4.getText().toString().trim()).contains(getIntent().getStringExtra("staffid"))){
             staff4.setVisibility(View.GONE);
         }
-        else if((getIntent().getStringExtra("staffid")).equals(staff5.getText().toString().trim())){
+        else if((staff5.getText().toString().trim()).contains(getIntent().getStringExtra("staffid"))){
             staff5.setVisibility(View.GONE);
         }
-        else if((getIntent().getStringExtra("staffid")).equals(staff6.getText().toString().trim())){
+        else if((staff6.getText().toString().trim()).contains(getIntent().getStringExtra("staffid"))){
             staff6.setVisibility(View.GONE);
         }
-        else if((getIntent().getStringExtra("staffid")).equals(staff7.getText().toString().trim())){
+        else if((staff7.getText().toString().trim()).contains(getIntent().getStringExtra("staffid"))){
             staff7.setVisibility(View.GONE);
         }
         send_Invite = findViewById(R.id.sendInvitationbtn);
@@ -65,48 +69,51 @@ public class InviteSelectStaff extends AppCompatActivity {
         ETime = getIntent().getStringExtra("EndTime");
         RoomNum = getIntent().getStringExtra("RoomNo");
         Cate = getIntent().getStringExtra("Category");
-        SenderID = getIntent().getStringExtra("staffid");
+        SenderID = PreferenceData.getLoggedInEmailUser(this);
 
 
         send_Invite.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if(!staff1.isChecked()&&!staff2.isChecked()&&!staff3.isChecked()&&!staff4.isChecked()&&!staff5.isChecked()&&!staff6.isChecked()&&!staff7.isChecked()){
+                    Toast.makeText(getApplicationContext(),"Please select at least one Staff",Toast.LENGTH_LONG).show();
+                    return;
+                }
                 for(int i=1;i<=7;i++){
                     switch (i){
                         case 1:
                             if(staff1.isChecked()){
-
-                                new MyTask(SenderID,staff1.getText().toString(),STime,ETime,RoomNum,ADate,Cate).execute();
+                                new MyTask(SenderID,String.valueOf(1794805),STime,ETime,RoomNum,ADate,Cate).execute();
                             }
                             break;
                         case 2:
                             if(staff2.isChecked()){
-                                new MyTask(SenderID,staff2.getText().toString(),STime,ETime,RoomNum,ADate,Cate).execute();
+                                new MyTask(SenderID,String.valueOf(172602),STime,ETime,RoomNum,ADate,Cate).execute();
                             }
                             break;
                         case 3:
                             if(staff3.isChecked()){
-                                new MyTask(SenderID,staff3.getText().toString(),STime,ETime,RoomNum,ADate,Cate).execute();
+                                new MyTask(SenderID,String.valueOf(178000),STime,ETime,RoomNum,ADate,Cate).execute();
                             }
                             break;
                         case 4:
                             if(staff4.isChecked()){
-                                new MyTask(SenderID,staff4.getText().toString(),STime,ETime,RoomNum,ADate,Cate).execute();
+                                new MyTask(SenderID,String.valueOf(179000),STime,ETime,RoomNum,ADate,Cate).execute();
                             }
                             break;
                         case 5:
                             if(staff5.isChecked()){
-                                new MyTask(SenderID,staff5.getText().toString(),STime,ETime,RoomNum,ADate,Cate).execute();
+                                new MyTask(SenderID,String.valueOf(1794278),STime,ETime,RoomNum,ADate,Cate).execute();
                             }
                             break;
                         case 6:
                             if(staff6.isChecked()){
-                                new MyTask(SenderID,staff6.getText().toString(),STime,ETime,RoomNum,ADate,Cate).execute();
+                                new MyTask(SenderID,String.valueOf(1795598),STime,ETime,RoomNum,ADate,Cate).execute();
                             }
                             break;
                         case 7:
                             if(staff7.isChecked()){
-                                new MyTask(SenderID,staff7.getText().toString(),STime,ETime,RoomNum,ADate,Cate).execute();
+                                new MyTask(SenderID,String.valueOf(1791234),STime,ETime,RoomNum,ADate,Cate).execute();
                             }
                             break;
                     }
