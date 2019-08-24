@@ -43,7 +43,7 @@ public class SetAvailability extends AppCompatActivity {
 
     Calendar mcurrentTime;
     int currentHour,currentMinute;
-    String ampm;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -77,14 +77,24 @@ public class SetAvailability extends AppCompatActivity {
                 mTimePicker = new TimePickerDialog(SetAvailability.this, new TimePickerDialog.OnTimeSetListener() {
                     @Override
                     public void onTimeSet(TimePicker timePicker, int selectedHour, int selectedMinute) {
-                        if (selectedHour>=12){
-                            ampm="PM";
-                        } else{
-                            ampm="AM";
-                        }
-                        AvlbSTime.setText(String.format("%02d:%02d",selectedHour,selectedMinute)+ampm);
-                    }
-                }, currentHour, currentMinute, false);
+
+                            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                            String currentDate = sdf.format(new Date());
+                            if (AvlbSelectDate.getText().toString().trim().equals("Select Date")){
+                                Toast.makeText(getApplicationContext(),"please select date first",Toast.LENGTH_LONG).show();
+                            }
+                            else if((AvlbSelectDate.getText().toString().trim().equals(currentDate)) && selectedHour<=currentHour) {
+                                if(selectedMinute<=currentMinute) {
+                                    Toast.makeText(getApplicationContext(), "Please enter valid time", Toast.LENGTH_LONG).show();
+                                }
+                                else {
+                                    AvlbSTime.setText(String.format("%02d:%02d",selectedHour,selectedMinute));
+                                }
+                            }
+                            else {
+                                AvlbSTime.setText(String.format("%02d:%02d",selectedHour,selectedMinute));
+                            }}
+                    }, currentHour, currentMinute, true);
                 mTimePicker.setTitle("Select Start Time");
                 mTimePicker.show();
             }
@@ -98,12 +108,21 @@ public class SetAvailability extends AppCompatActivity {
                 mTimePicker = new TimePickerDialog(SetAvailability.this, new TimePickerDialog.OnTimeSetListener() {
                     @Override
                     public void onTimeSet(TimePicker timePicker, int selectedHour, int selectedMinute) {
-                        if (selectedHour>=12){
-                            ampm="PM";
-                        } else{
-                            ampm="AM";
+                        if(AvlbSTime.getText().toString().trim().equals("Select Start Time")){
+                            Toast.makeText(getApplicationContext(),"Please select start time first",Toast.LENGTH_LONG).show();
+
                         }
-                        AvlbETime.setText(String.format("%02d:%02d",selectedHour,selectedMinute)+ampm);
+                        else if(selectedHour<Integer.parseInt(AvlbSTime.getText().toString().trim().substring(0,2))){
+                            Toast.makeText(getApplicationContext(),"Please select valid time",Toast.LENGTH_LONG).show();
+
+                        }
+                        else if(selectedHour==Integer.parseInt(AvlbSTime.getText().toString().trim().substring(0,2))&&selectedMinute<=Integer.parseInt(AvlbSTime.getText().toString().trim().substring(3,5))){
+                            Toast.makeText(getApplicationContext(),"Please select valid time",Toast.LENGTH_LONG).show();
+
+                        }
+                        else {
+                            AvlbETime.setText(String.format("%02d:%02d", selectedHour, selectedMinute));
+                        }
                     }
                 }, currentHour, currentMinute, true);
                 mTimePicker.setTitle("Select End Time");

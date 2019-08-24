@@ -18,7 +18,9 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 
 public class SetAppointments extends AppCompatActivity {
      Button invitebutton;
@@ -69,12 +71,23 @@ public class SetAppointments extends AppCompatActivity {
                 mTimePicker = new TimePickerDialog(SetAppointments.this, new TimePickerDialog.OnTimeSetListener() {
                     @Override
                     public void onTimeSet(TimePicker timePicker, int selectedHour, int selectedMinute) {
-
-
-
-                        StartTime.setText(String.format("%02d:%02d",selectedHour,selectedMinute));
-                    }
-                }, currentHour, currentMinute, false);
+                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                        String currentDate = sdf.format(new Date());
+                        if (DateTxt.getText().toString().trim().equals("Select Date")){
+                            Toast.makeText(getApplicationContext(),"please select date first",Toast.LENGTH_LONG).show();
+                        }
+                        else if((DateTxt.getText().toString().trim().equals(currentDate)) && selectedHour<=currentHour) {
+                            if(selectedMinute<=currentMinute) {
+                                Toast.makeText(getApplicationContext(), "Please enter valid time", Toast.LENGTH_LONG).show();
+                            }
+                            else {
+                                StartTime.setText(String.format("%02d:%02d",selectedHour,selectedMinute));
+                            }
+                            }
+                            else {
+                                StartTime.setText(String.format("%02d:%02d",selectedHour,selectedMinute));
+                            }}
+                }, currentHour, currentMinute, true);
                 mTimePicker.setTitle("Select Start Time");
                 mTimePicker.show();
 
@@ -99,9 +112,11 @@ public class SetAppointments extends AppCompatActivity {
                             Toast.makeText(getApplicationContext(),"Please select valid time",Toast.LENGTH_LONG).show();
 
                         }
+                        else if(selectedHour==Integer.parseInt(StartTime.getText().toString().trim().substring(0,2))&&selectedMinute<=Integer.parseInt(StartTime.getText().toString().trim().substring(3,5))){
+                            Toast.makeText(getApplicationContext(),"Please select valid time",Toast.LENGTH_LONG).show();
+
+                        }
                         else {
-
-
                             EndTime.setText(String.format("%02d:%02d", selectedHour, selectedMinute));
                         }
                     }
@@ -118,7 +133,7 @@ public class SetAppointments extends AppCompatActivity {
         invitebutton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if((DateTxt.getText().toString().trim()).equals("Select Date")|(StartTime.getText().toString().trim()).equals("Select Start Time")|(EndTime.getText().toString().trim()).equals("Select End Time")|(RoomNum.getText().toString().trim()).length()<=0){
+                if((DateTxt.getText().toString().trim()).equals("Select Date")|(StartTime.getText().toString().trim()).equals("Select Start Time")|(EndTime.getText().toString().trim()).equals("Select End Time")|(RoomNum.getText().toString().trim()).equals("")|Integer.parseInt(RoomNum.getText().toString())<1){
                     Toast.makeText(getApplicationContext(),"Enter Valid Details",Toast.LENGTH_LONG).show();
                     return;
                 }

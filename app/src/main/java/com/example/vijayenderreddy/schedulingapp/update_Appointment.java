@@ -26,7 +26,9 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 
 public class update_Appointment extends AppCompatActivity {
 
@@ -76,12 +78,28 @@ public class update_Appointment extends AppCompatActivity {
                 mTimePicker = new TimePickerDialog(update_Appointment.this, new TimePickerDialog.OnTimeSetListener() {
                     @Override
                     public void onTimeSet(TimePicker timePicker, int selectedHour, int selectedMinute) {
-                        AptSTime.setText(String.format("%02d:%02d",selectedHour,selectedMinute));
-                    }
-                }, currentHour, currentMinute, false);
+
+                            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                            String currentDate = sdf.format(new Date());
+                            if (AptDate.getText().toString().trim().equals("Select Date")){
+                                Toast.makeText(getApplicationContext(),"please select date first",Toast.LENGTH_LONG).show();
+                            }
+                            else if((AptDate.getText().toString().trim().equals(currentDate))&& selectedHour<=currentHour) {
+                                if(selectedMinute<=currentMinute) {
+                                    Toast.makeText(getApplicationContext(), "Please enter valid time", Toast.LENGTH_LONG).show();
+                                }
+                                else {
+                                    AptSTime.setText(String.format("%02d:%02d",selectedHour,selectedMinute));
+                                }
+                            }
+                            else {
+                                AptSTime.setText(String.format("%02d:%02d",selectedHour,selectedMinute));
+                            }}
+
+                    }, currentHour, currentMinute, true);
                 mTimePicker.setTitle("Select Start Time");
                 mTimePicker.show();
-            }
+                }
         });
 
 
@@ -91,26 +109,27 @@ public class update_Appointment extends AppCompatActivity {
 
                 TimePickerDialog mTimePicker;
                 mTimePicker = new TimePickerDialog(update_Appointment.this, new TimePickerDialog.OnTimeSetListener() {
-                    @Override
                     public void onTimeSet(TimePicker timePicker, int selectedHour, int selectedMinute) {
+                        if(AptSTime.getText().toString().trim().equals("Select Start Time")){
+                            Toast.makeText(getApplicationContext(),"Please select start time first",Toast.LENGTH_LONG).show();
 
-                            if(AptSTime.getText().toString().trim().equals("Select Start Time")){
-                                Toast.makeText(getApplicationContext(),"Please select start time first",Toast.LENGTH_LONG).show();
+                        }
+                        else if(selectedHour<Integer.parseInt(AptSTime.getText().toString().trim().substring(0,2))){
+                            Toast.makeText(getApplicationContext(),"Please select valid time",Toast.LENGTH_LONG).show();
 
-                            }
-                            else if(selectedHour<Integer.parseInt(AptSTime.getText().toString().trim().substring(0,2))){
-                                Toast.makeText(getApplicationContext(),"Please select valid time",Toast.LENGTH_LONG).show();
+                        }
+                        else if(selectedHour==Integer.parseInt(AptSTime.getText().toString().trim().substring(0,2))&&selectedMinute<=Integer.parseInt(AptSTime.getText().toString().trim().substring(3,5))){
+                            Toast.makeText(getApplicationContext(),"Please select valid time",Toast.LENGTH_LONG).show();
 
-                            }
-                            else {
-
-
-                               AptETime.setText(String.format("%02d:%02d", selectedHour, selectedMinute));
-                            }
+                        }
+                        else {
+                            AptETime.setText(String.format("%02d:%02d", selectedHour, selectedMinute));
+                        }
                     }
                 }, currentHour, currentMinute, true);
                 mTimePicker.setTitle("Select End Time");
                 mTimePicker.show();
+
             }
         });
 
@@ -143,7 +162,7 @@ public class update_Appointment extends AppCompatActivity {
         UpdateBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if((AptRoomNum.getText().toString().trim()).equals("")){
+                if((AptRoomNum.getText().toString().trim()).equals("")|Integer.parseInt(AptRoomNum.getText().toString())<1){
                     Toast.makeText(getApplicationContext(),"Enter Valid Details.",Toast.LENGTH_LONG).show();
                     return;
                 }
