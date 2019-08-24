@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import org.json.JSONException;
@@ -25,13 +26,17 @@ public class AppointmentRequests extends AppCompatActivity {
     Button acceptedbutton, rejectedbutton,appointrequesthome;
     JSONObject MainObj;
     String Status;
+    TextView NoAppointments;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.appointment_request);
 
-
+        if(PreferenceData.getLoggedInEmailUser(this).equals("")){
+            Intent i = new Intent(this,MainActivity.class);
+            startActivity(i);
+        }
 
         acceptedbutton = (Button)findViewById(R.id.acceptbtn);
         rejectedbutton=(Button)findViewById(R.id.rejectbtn);
@@ -41,20 +46,27 @@ public class AppointmentRequests extends AppCompatActivity {
         invite2 = findViewById(R.id.invitation2);
         invite3 = findViewById(R.id.invitation3);
 
+        NoAppointments = findViewById(R.id.noapttxt);
+
 
         appointrequesthome.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent i = new Intent(AppointmentRequests.this, HomePage.class);
+                i.putExtra("staffid",getIntent().getStringExtra("staffid"));
                 startActivity(i);
             }
         });
 
-        new MyTask(getIntent().getStringExtra("staffid")).execute();
+        new MyTask(PreferenceData.getLoggedInEmailUser(this)).execute();
 
         acceptedbutton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if(!invite1.isChecked()&&!invite2.isChecked()&&!invite3.isChecked()){
+                    Toast.makeText(getApplicationContext(),"Please select an invitation",Toast.LENGTH_LONG).show();
+                    return;
+                }
                 Status = "ACCEPTED";
                 for(int i=0;i<=2;i++){
                     String StaffId="",SenderId="";
@@ -90,6 +102,10 @@ public class AppointmentRequests extends AppCompatActivity {
         rejectedbutton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if(!invite1.isChecked()&&!invite2.isChecked()&&!invite3.isChecked()){
+                    Toast.makeText(getApplicationContext(),"Please select an invitation",Toast.LENGTH_LONG).show();
+                    return;
+                }
                 Status = "REJECTED";
                 for(int i=0;i<=2;i++){
                     String StaffId="",SenderId="";
@@ -183,14 +199,28 @@ public class AppointmentRequests extends AppCompatActivity {
         @Override
         protected void onPostExecute(String result){
             super.onPostExecute(result);
-
+            if(result.equals("{}")){
+                NoAppointments.setVisibility(View.VISIBLE);
+                acceptedbutton.setVisibility(View.GONE);
+                rejectedbutton.setVisibility(View.GONE);
+                return;
+            }
             try {
                  MainObj =new JSONObject(result);
                 for(int i = 0;i<=2;i++){
                     if(MainObj.has(String.valueOf(i))){
                         JSONObject jsonObject = MainObj.getJSONObject(String.valueOf(i));
-
-                        String Invitation = "You have an invitation With StaffId: "+jsonObject.getString("SenderId")+"\non Date:"+jsonObject.getString("AppointmentDate")+"\nStart Time: "+jsonObject.getString("startTime")+" End Time: "+jsonObject.getString("endTime")+"\nRoom Number: "+jsonObject.getString("roomNumber")+" Category: "+jsonObject.getString("Category");
+                        String StartTime = jsonObject.getString("startTime");
+                        String EndTime = jsonObject.getString("endTime");
+                        if(StartTime.length()==3){
+                            StartTime = "0"+StartTime;
+                        }
+                        if(EndTime.length()==3){
+                            EndTime = "0"+EndTime;
+                        }
+                        StartTime = StartTime.substring(0,2)+":"+StartTime.substring(2,4);
+                        EndTime = EndTime.substring(0,2)+":"+EndTime.substring(2,4);
+                        String Invitation = "You have an invitation from "+jsonObject.getString("Sender")+"\non Date:"+jsonObject.getString("AppointmentDate")+"\nStart Time: "+StartTime+" End Time: "+EndTime+"\nRoom Number: "+jsonObject.getString("roomNumber")+" Category: "+jsonObject.getString("Category");
                         if(i==0){
                             invite1.setVisibility(View.VISIBLE);
                             invite1.setText(Invitation);
@@ -291,6 +321,7 @@ public class AppointmentRequests extends AppCompatActivity {
                     Toast.makeText(getApplicationContext(),"Invitation has been rejected.",Toast.LENGTH_LONG).show();
                 }
                 Intent i = new Intent(AppointmentRequests.this, HomePage.class);
+                i.putExtra("staffid",getIntent().getStringExtra("staffid"));
                 startActivity(i);
                 finish();
             }
